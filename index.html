@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Appellatwix - A Name Generator</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="css/jquery-ui.css" rel="stylesheet">
+	<link href="css/jquery-ui.structure.css" rel="stylesheet">
+	<link href="css/style.css" rel="stylesheet">
+</head>
+
+<body>
+	<div id="input_word_template">
+		<div class="input_input">
+			<input type="text" class="input_field" placeholder="type a word to search for" />
+			<button class="add_input_word round_button">+</button>
+			<button class="remove_row round_button">-</button>
+		</div>
+		<div class="loader"></div>
+		<div class="input_results"></div>
+	</div>
+
+	<div id="result_type_template">
+		<span class="fl"></span>
+		<span class="shortdef"></span>
+	</div>
+
+	<div id="title"><h1>Appellatwix</h1> <h3>A Name Generator</h3></div>
+
+	<div id="header">
+		<div id="settings" class="container">
+			<div class="explain">
+				<p>Below you can type 2 - 3 words (adding or subtracting words using the <b>+</b> and <b>-</b> buttons.)</p>
+				<p>Once you have entered your words, click <b>search</b> to generate synonyms, then click <b>blend</b> to run the name blender.</p>
+			</div>
+
+			<div class="buttons">
+				<button id="search">Search</button>
+				<button id="blend">Blend</button>
+				<button id="clear">Clear</button>
+			</div>
+		</div>
+
+		<div id="blender" class="container"></div>
+	</div>
+	
+	<div id="input_body"></div>
+	
+	<script>
+		if(location.host === 'localhost')
+		{
+			document.write('<script src="http://' + (location.host || 'localhost')
+				.split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')
+		}
+	</script>
+	<script src="js/jquery-3.4.1.min.js"></script>
+	<script src="js/jquery-ui.min.js"></script>
+	<script src="js/jquery.injectCSS.js"></script>
+	<script src="js/script.js"></script>
+</body>
+
+</html>
