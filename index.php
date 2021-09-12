@@ -44,13 +44,13 @@ if(file_exists('settings.php')){
 
 	<meta property="og:title" content="<?php echo $settings['title']; ?>">
   <meta property="og:description" content="Programmatically generates word combinations.">
-  <meta property="og:image" content="css/card_img.png">
+  <meta property="og:image" content="<?php echo $settings['Appellatwix_site_path']; ?>css/card_img.png">
   <meta property="og:url" content="<?php echo $settings['Appellatwix_site_path']; ?>">
   <meta property="og:type" content="website">
 
   <meta name="twitter:title" content="<?php echo $settings['title']; ?>">
   <meta name="twitter:description" content="Programmatically generates word combinations.">
-  <meta name="twitter:image" content="css/card_img.png">
+  <meta name="twitter:image" content="<?php echo $settings['Appellatwix_site_path']; ?>css/card_img.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:creator" content="@rotterz">
 </head>
