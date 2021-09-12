@@ -12,7 +12,7 @@ $settings = array(
   //in settings.php you really only need to set these, you can leave the others alone.
   //page title
   'title' => 'Appellatwix - A Name Generator | z0m.bi',
-  //CAHrot URL ie: http://z0m.bi/apps/Appellatwix/ (need that last slash)
+  //Appellatwix URL ie: http://z0m.bi/apps/Appellatwix/ (need that last slash)
   'Appellatwix_site_path' => "http://" . $_SERVER['SERVER_NAME'] . '/Appellatwix/',
   //anything to include in the bottom of the page, ie /var/www/html/tracking.html
   'include_footer' => '',
