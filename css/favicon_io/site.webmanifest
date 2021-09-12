@@ -1,0 +1,11 @@
+{
+  "name":"Appellatwix",
+  "short_name":"Appellatwix",
+  "icons":[
+    {"src":"css/favicon_io/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},
+    {"src":"css/favicon_io/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}
+  ],
+  "theme_color":"#64ff6c",
+  "background_color":"#4f5b74",
+  "display":"standalone"
+}
