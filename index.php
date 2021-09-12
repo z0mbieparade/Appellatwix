@@ -3,7 +3,25 @@
 
 require('settings_default.php');
 require('inc/vars.php');
-$default_settings = $settings;
+$set = $settings;
+$setup = false;
+if(file_exists('settings.php')){
+	include('settings.php');
+	foreach($settings as $key => $val){
+		$set[$key] = $val;
+	}
+	$setup = true;
+}
+if(file_exists('../all_settings.php')){
+	include('../all_settings.php');
+	if(isset($all_settings['Appellatwix'])){
+		foreach($all_settings['Appellatwix'] as $key => $val){
+			$set[$key] = $val;
+		}
+		$setup = true;
+	}
+}
+$settings = $set;
 $js_settings = array(
 	'debug' => $settings['debug'],
 	'server_side_blending' => $settings['server_side_blending'],
@@ -11,21 +29,6 @@ $js_settings = array(
 	'use_lists' => $use_lists,
 	'all_lists' => $all_lists,
 );
-$setup = false;
-if(file_exists('settings.php')){
-	include('settings.php');
-	$settings = array_merge($default_settings, $settings);
-	$setup = true;
-	if(isset($settings['debug'])){
-		$js_settings['debug'] = $settings['debug'];
-	}
-	if(isset($settings['server_side_blending'])){
-		$js_settings['server_side_blending'] = $settings['server_side_blending'];
-	}
-	if(isset($settings['words'])){
-		$js_settings['words'] = $settings['words'];
-	}
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">

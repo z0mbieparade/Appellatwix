@@ -15,8 +15,22 @@ class Combine
   {
     require('../settings_default.php');
     require('vars.php');
-
-    $this->settings = $settings;
+    $set = $settings;
+    if(file_exists('../settings.php')){
+    	include('../settings.php');
+    	foreach($settings as $key => $val){
+    		$set[$key] = $val;
+    	}
+    }
+    if(file_exists('../../all_settings.php')){
+    	include('../../all_settings.php');
+    	if(isset($all_settings['Appellatwix'])){
+    		foreach($all_settings['Appellatwix'] as $key => $val){
+    			$set[$key] = $val;
+    		}
+    	}
+    }
+    $this->settings = $set;
     $this->settings['use_lists'] = $use_lists;
     $this->settings['all_lists'] = $all_lists;
     if(file_exists(dirname(__FILE__) . '/../settings.php')){
