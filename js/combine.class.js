@@ -1,12 +1,19 @@
 class Combine {
+
   constructor(settings) {
-    this.settings = settings;
+    this.settings = {...{
+      on_update_word_list: function(){},
+      on_update_mash_list: function(){}
+    }, ...settings};
     this.word_list = {}; //all the words found during search
     this.word_tab_list = {}; //the tabs generated on search
-    this.use_words = {}; //all the words we'll be using in the blender
     this.blend_tree = {}; //blender variables
+    this.use_mashes = [];
 
-    //this.max = 20; //for debugging, limits the amount of words used
+    this.max = 20; //for debugging, limits the amount of words used
+
+    this.update_word_list_timer = null;
+    this.update_mash_list_timer = null;
   }
 
   add_word(word, relates_to, list)
@@ -28,6 +35,7 @@ class Combine {
   	this.settings.words.forEach(function(word)
   	{
   		_this.word_tab_list[word] = {
+        use_words: [word],
   			use: true
   		};
 
@@ -76,13 +84,170 @@ class Combine {
       _this.settings.words.forEach(function(word){
         for(var tab_id in _this.word_tab_list[word])
   			{
-  				if(tab_id === 'use') continue;
-  				_this.word_tab_list[word][tab_id].use = _this.word_tab_list[word][tab_id].id === word;
+  				if(tab_id === 'use' || tab_id === 'use_words') continue;
+
+          let use = _this.word_tab_list[word][tab_id].id === word && _this.word_tab_list[word][tab_id].fl !== 'error';
+  				_this.word_tab_list[word][tab_id].use = use;
+
+          if(_this.word_tab_list[word][tab_id].use)
+          {
+            _this.set_words(true, word, tab_id);
+          }
         }
       });
 
+      console.log(_this.word_tab_list);
+
   		if(search_complete) search_complete();
   	});
+  }
+
+  update_word_list()
+  {
+    let _this = this;
+    clearTimeout(this.update_word_list_timer);
+    this.update_word_list_timer = setTimeout(function()
+    {
+      _this.settings.on_update_word_list(_this.word_tab_list);
+    }, 100);
+  }
+
+  //only to be referenced by set_words
+  set_all_words(use, word, tab_id, sense_id, wd)
+  {
+    if(!word || !this.word_tab_list[word]) return;
+
+    //console.log('set_all_words', use, word, tab_id, sense_id, wd);
+
+    let add_sub_words = [];
+
+    for(let tab in this.word_tab_list[word])
+    {
+      if(tab === 'use' || tab === 'use_words' || (tab_id && tab_id !== tab)) continue;
+
+      if(!sense_id && !wd)
+      {
+        this.word_tab_list[word][tab].use = use;
+      }
+
+      //console.log('tab', tab, this.word_tab_list[word][tab])
+
+      for(let sense in this.word_tab_list[word][tab].sense)
+      {
+        if(sense_id === 'use' || (sense_id && sense_id !== sense)) continue;
+
+        if(!wd)
+        {
+          this.word_tab_list[word][tab].sense[sense].use = use;
+        }
+
+        //console.log('sense', sense, this.word_tab_list[word][tab].sense[sense]);
+
+        for(let list in this.word_tab_list[word][tab].sense[sense])
+        {
+          if(['use', 'def', 'hide'].includes(list)) continue;
+
+          //console.log('list', list, this.word_tab_list[word][tab].sense[sense][list]);
+
+          if(wd && this.word_tab_list[word][tab].sense[sense][list].includes(wd))
+          {
+            add_sub_words.push(wd);
+          }
+          else if(!wd)
+          {
+            add_sub_words = add_sub_words.concat(this.word_tab_list[word][tab].sense[sense][list])
+          }
+        }
+      }
+    }
+
+    //console.log('add_sub_words', add_sub_words);
+
+    if(add_sub_words.length > 0)
+    {
+      //this.word_tab_list[word].use_words = this.word_tab_list[word].use_words || [];
+
+      if(use === true)
+      {
+        for(let i = 0; i < add_sub_words.length; i++)
+        {
+          if(!this.word_tab_list[word].use_words.includes(add_sub_words[i]))
+          {
+            this.word_tab_list[word].use_words.push(add_sub_words[i]);
+          }
+        }
+
+        if(!this.word_tab_list[word].use_words.includes(word))
+        {
+          this.word_tab_list[word].use_words.push(word)
+        }
+
+        this.word_tab_list[word].use_words.sort();
+        //console.log('set_all_words', use, word, this.word_tab_list[word].use_words);
+        this.update_word_list();
+      }
+      else if(use === false)
+      {
+        for(let i = 0; i < add_sub_words.length; i++)
+        {
+          let index = this.word_tab_list[word].use_words.indexOf(add_sub_words[i])
+          if(index > -1)
+          {
+            this.word_tab_list[word].use_words.splice(index, 1);
+          }
+        }
+
+        if(!this.word_tab_list[word].use_words.includes(word))
+        {
+          this.word_tab_list[word].use_words.push(word)
+        }
+
+        this.word_tab_list[word].use_words.sort();
+        //console.log('set_all_words', use, word, this.word_tab_list[word].use_words);
+        this.update_word_list();
+      }
+    }
+  }
+
+  set_words(use, word, tab_id, sense_id, wd)
+  {
+    if(!word || !this.word_tab_list[word])
+    {
+      return; //we need at least a word.
+    }
+
+    if(use === true || use === false)
+    {
+      this.set_all_words(use, word, tab_id, sense_id, wd);
+    }
+  }
+
+  update_mash_list()
+  {
+    let _this = this;
+    clearTimeout(this.update_mash_list_timer);
+    this.update_word_list_timer = setTimeout(function()
+    {
+      console.log('update_mash_list', _this.use_mashes);
+      _this.settings.on_update_mash_list(_this.use_mashes);
+    }, 100);
+  }
+
+  set_mash(use, comb)
+  {
+    console.log('set_mash', use, comb);
+    if(use === true && !this.use_mashes.includes(comb))
+    {
+      this.use_mashes.push(comb);
+      this.use_mashes.sort();
+      this.update_mash_list();
+    }
+    else if(use === false && this.use_mashes.includes(comb))
+    {
+      let index = this.use_mashes.indexOf(comb);
+      this.use_mashes.splice(index, 1);
+      this.update_mash_list();
+    }
   }
 
   //get syns from thesaurus for word
@@ -102,13 +267,13 @@ class Combine {
   					var tab_id = 'error-' + word.replace(/[^\w]/gm, '_');
 
   					_this.word_tab_list[word][tab_id] = {
-  						use: true,
+  						use: false,
   						id: word,
   						fl: 'error',
   						sense: {
   							100: {
-  								use: true,
-  								def: ['The word you\'ve entered isn\'t in the Merriam-Webster Thesaurus. Choose a different word?'],
+  								use: false,
+  								def: ['The word you\'ve entered isn\'t in the Merriam-Webster Thesaurus. You can choose one below anyway or re-search.'],
   								err_list: result,
   								input_list: [word]
   							}
@@ -148,7 +313,7 @@ class Combine {
   												s.sn = s.sn || '0';
 
   												_this.word_tab_list[word][item.meta.uuid].sense[s.sn] = {
-  													use: true,
+  													use: false,
   													def: []
   												};
 
@@ -303,6 +468,45 @@ class Combine {
   		id: id
   	}
 
+    //Ablaut Reduplication: knickknack, zigzag, kittycat, hip-hop.
+    //Rhyming Reduplication: boogie-woogie, easy-peasy
+    //https://proedit.com/ablaut-reduplication/
+    var check_reduplication = function(new_mash)
+    {
+      new_mash.syl_count = _this.create_syls(new_mash.combo).length;
+
+      let match_iao1 = new_mash.combo.match(/^[^aioe]+i[^aio]+a[^aio]+o[^aio]+$/i);
+      let match_iao2 = new_mash.combo.match(/^[^aioe]+i[^aio]+(a|o)[^aio]+$/i);
+      let match_iao3 = new_mash.combo.match(/^[^aioe]+a[^aio]+o[^aio]+$/i);
+
+      if(match_iao1 || match_iao2 || match_iao3)
+      {
+        new_mash.types.push('iao');
+      }
+
+      if(!new_mash.types.includes('rhyme_redup'))
+      {
+        //do some regex rhyme matching
+        //this will match stuff like b(eat)-def(eat)
+        let match_rhyme1 = (new_mash.parts[0] + '-' + new_mash.parts[1]).match(/^[^aeiou]*([aeiou]+\w{1,5})-?(\w+)(\1)$/i);
+        let match_rhyme2 = null;
+        let match_rhyme3 = null;
+
+        if(new_mash.parts[2])
+        {
+          match_rhyme2 = (new_mash.parts[0] + '-' + new_mash.parts[2]).match(/^[^aeiou]*([aeiou]+\w{1,5})-?(\w+)(\1)$/i);
+          match_rhyme3 = (new_mash.parts[1] + '-' + new_mash.parts[2]).match(/^[^aeiou]*([aeiou]+\w{1,5})-?(\w+)(\1)$/i);
+        }
+
+        if(match_rhyme1 || match_rhyme2 || match_rhyme3)
+        {
+          new_mash.types.push('rhyme_redup');
+        }
+      }
+
+      return new_mash;
+    }
+
   	var step_mash = function(options)
   	{
   		var options = $.extend({
@@ -310,13 +514,14 @@ class Combine {
   			second_word: second_word,
   			first_word_part: first_word,
   			second_word: second_word,
+        last_word_part: '',
   			type: null
   		}, options)
 
   		var new_mash = JSON.parse(JSON.stringify(mash));
   		var new_words = words.slice();
 
-  		new_mash.combo = options.first_word_part + options.second_word_part;
+  		new_mash.combo = options.first_word_part + options.second_word_part + options.last_word_part;
   		if(new_mash.parts)
   		{
   			new_mash.parts.push(options.second_word_part);
@@ -330,6 +535,11 @@ class Combine {
   			new_mash.types = [options.type];
   		}
 
+      if(options.last_word_part)
+      {
+        new_mash.parts.push(options.last_word_part);
+      }
+
   		if(new_words.length > 0)
   		{
   			new_words.unshift(new_mash.combo);
@@ -337,7 +547,7 @@ class Combine {
   		}
   		else if(!_this.blend_tree.mashes[new_mash.combo])
   		{
-  			_this.blend_tree.mashes[new_mash.combo] = new_mash;
+  			_this.blend_tree.mashes[new_mash.combo] = check_reduplication(new_mash);
   		}
   		else if(!_this.blend_tree.mashes[new_mash.combo].types.includes(options.type))
   		{
@@ -367,8 +577,12 @@ class Combine {
   	}
 
 
-  	//mash together words that have a sylable that start with the same letter as another words sylables
+  	//1. mash together words that have a syllable that start with the same letter as another words syllables
   	//i.e. franken|stein + squash -> frankensquash
+
+    //2. mash together words first_word_syl + second_word + first_word_syl[2]
+    //i.e. franken|stein + squash -> frankensquashstein
+
   	var first_word_syl = _this.create_syls(first_word);
   	var second_word_syl = _this.create_syls(second_word);
   	if(first_word_syl.length > 1)
@@ -399,13 +613,26 @@ class Combine {
   								second_word_part: second_word_part,
   								type: 'syl_match'
   							})
+
+                let last_word_part = first_word.replace(new RegExp('^' + first_word_part, 'i'), '');
+                if(last_word_part && last_word_part !== second_word_part)
+                {
+                  step_mash({
+    								first_word: first_word,
+    								second_word: second_word,
+    								first_word_part: first_word_part,
+    								second_word_part: second_word_part,
+                    last_word_part: last_word_part,
+    								type: 'syl_squish'
+    							})
+                }
   						}
   					}
   				}
   				catch(e)
   				{
   					if(_this.settings.debug) console.log(first_word_syl, first_word_syl[i + 1], first_word_syl[i + 1].slice(0, 1))
-  					_this.log_error('make_mash step_mash syl_match', e);
+  					_this.log_error('make_mash step_mash syl_match/syl_squish', e);
   				}
   			}
   		})
@@ -450,6 +677,19 @@ class Combine {
   				type: 'sounds_like'
   			})
   		}
+
+      //do some regex rhyme matching
+      //this will match stuff like b(eat)-def(eat)
+      if((first_word + '-' + second_word).match(/^[^aeiou]*([aeiou]+\w{1,5})-?(\w+)(\1)$/i))
+      {
+        step_mash({
+  				first_word: first_word,
+  				second_word: second_word,
+  				first_word_part: first_word,
+  				second_word_part: second_word,
+  				type: 'rhyme_redup'
+  			})
+      }
   	})
   }
 
@@ -477,44 +717,13 @@ class Combine {
   		return;
   	}
 
-  	var permutation_count = 0;
+    let use_words = {};
+  	let permutation_count = 0;
   	this.settings.words.forEach(function(word)
   	{
-      var count = 0;
-  		_this.use_words[word] = [];
+      use_words[word] = _this.word_tab_list[word].use_words;
 
-  		for(var tab_id in _this.word_tab_list[word])
-  		{
-  			if(_this.word_tab_list[word][tab_id].use)
-  			{
-  				for(var sense_id in _this.word_tab_list[word][tab_id].sense)
-  				{
-  					if(_this.word_tab_list[word][tab_id].sense[sense_id].use)
-  					{
-  						_this.settings.use_lists.forEach(function(list)
-  						{
-  							if(_this.word_tab_list[word][tab_id].sense[sense_id][list])
-  							{
-  								_this.word_tab_list[word][tab_id].sense[sense_id][list].forEach(function(w)
-  								{
-                    if((_this.max && count < _this.max) || !_this.max){
-                      _this.add_word(w, word, list);
-
-    									if(!_this.use_words[word].includes(w))
-    									{
-    										_this.use_words[word].push(w);
-                        count++;
-    									}
-                    }
-  								})
-  							}
-  						})
-  					}
-  				}
-  			}
-  		}
-
-  		if(_this.use_words[word].length === 0)
+  		if(_this.word_tab_list[word].use_words.length === 0)
   		{
   			keep_blending = false;
         error('No words selected for ' + word + '. Check some checkboxes or pick a different word.');
@@ -522,7 +731,7 @@ class Combine {
   		}
   		else
   		{
-  			permutation_count = (permutation_count === 0 ? _this.use_words[word].length : permutation_count * _this.use_words[word].length);
+  			permutation_count = (permutation_count === 0 ? _this.word_tab_list[word].use_words.length : permutation_count * _this.word_tab_list[word].use_words.length);
   		}
   	})
 
@@ -543,7 +752,7 @@ class Combine {
   			data: {
   				func: 'blend',
   				word_list: _this.word_list,
-  				use_words: _this.use_words
+  				use_words: use_words
   			},
   			success: function(res)
   			{
@@ -606,13 +815,13 @@ class Combine {
   					var a = arr.slice(0); // clone arr
   					a.push(wheels[i][j]);
 
-  					if (i==max)
+  					if (i == max)
   					{
   						result.push(a);
   					}
   					else
   					{
-  						helper(a, i+1);
+  						helper(a, i + 1);
   					}
   				}
   			}
@@ -630,7 +839,7 @@ class Combine {
   				permute.forEach(function(word)
   				{
   					try {
-  						_this.blend_tree.wheels[id].push(_this.use_words[word].slice());
+  						_this.blend_tree.wheels[id].push(_this.word_tab_list[word].use_words.slice());
   					}
   					catch(e)
   					{
@@ -674,12 +883,12 @@ class Combine {
     this.settings.words = [];
     this.word_list = {};
     this.word_tab_list = {};
-    this.use_words = {};
     this.blend_tree = {};
+    this.use_mashes = [];
   }
 
   log_error(location, error, explicit) {
-    if(_this.settings.debug)
+    if(this.settings.debug)
     {
       console.error(location, `[${explicit ? 'EXPLICIT' : 'INEXPLICIT'}] ${error.name}: ${error.message}`);
     }

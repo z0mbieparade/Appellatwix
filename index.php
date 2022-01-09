@@ -1,5 +1,6 @@
 <?php
 //Could do with some nice 1. 2. 3. in obvious spots
+//if you put two of the same word (text, text) it does some weird duplicat stuff
 
 require('settings_default.php');
 require('inc/vars.php');
@@ -64,42 +65,31 @@ $js_settings = array(
 		console.log('You have not created your settings.php file, please copy settings_default.php to settings.php and update it with correct settings.');
 	<?php }?>
 	</script>
-	<div id="input_word_template">
-		<div class="input_input">
-			<input type="text" class="input_field" placeholder="type a word to search for" />
-			<button class="add_input_word round_button">+</button>
-			<button class="remove_row round_button">-</button>
-		</div>
+
+	<div id="synonym_template">
+		<h3 class="word"></h3>
 		<div class="loader"></div>
+		<h4>Words to blend, click to remove:</h4>
+		<div class="use_words"></div>
+		<h4>Synonyms, click to add more to blending mix:</h4>
 		<div class="input_results"></div>
 	</div>
 
-	<div id="result_type_template">
-		<span class="fl"></span>
-		<span class="shortdef"></span>
-	</div>
+	<div id="title_words">
+		<div id="title"><h1>Appellatwix</h1> <h3>A Name Generator by <a href="https://z0m.bi" target="_blank">z0m.bi</a></div>
 
-	<div id="title"><h1>Appellatwix</h1> <h3>A Name Generator</h3></div>
-
-	<div id="header">
-		<div id="settings" class="container">
-			<div class="explain">
-				<p>Below you can type 2 - 3 words (adding or subtracting words using the <b>+</b> and <b>-</b> buttons.)</p>
-				<p>Once you have entered your words, click <b>search</b> to generate synonyms, then click <b>blend</b> to run the name blender.</p>
-			</div>
-
-			<div class="buttons">
-				<button id="search">Search</button>
-				<button id="blend">Blend (Browser)</button>
-				<button id="blend_server">Blend (Server)</button>
-				<button id="clear">Clear</button>
-			</div>
+		<div id="words">
+			<label for="input_words">Type 2-3 words to blend: <input id="input_words" /></label>
+			<button id="search">Get Synonyms</button>
+			<button id="blend">Blend</button>
+			<button id="clear">Clear</button>
 		</div>
-
-		<div id="blender" class="container"></div>
 	</div>
 
-	<div id="input_body"></div>
+	<div id="blender_syns">
+		<div id="blender" class="container"></div>
+		<div id="synonyms"></div>
+	</div>
 
 	<script src="js/jquery-3.4.1.min.js"></script>
 	<script src="js/jquery-ui.min.js"></script>
