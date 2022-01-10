@@ -96,8 +96,6 @@ class Combine {
         }
       });
 
-      console.log(_this.word_tab_list);
-
   		if(search_complete) search_complete();
   	});
   }
@@ -228,14 +226,14 @@ class Combine {
     clearTimeout(this.update_mash_list_timer);
     this.update_word_list_timer = setTimeout(function()
     {
-      console.log('update_mash_list', _this.use_mashes);
+      //console.log('update_mash_list', _this.use_mashes);
       _this.settings.on_update_mash_list(_this.use_mashes);
     }, 100);
   }
 
   set_mash(use, comb)
   {
-    console.log('set_mash', use, comb);
+    //console.log('set_mash', use, comb);
     if(use === true && !this.use_mashes.includes(comb))
     {
       this.use_mashes.push(comb);

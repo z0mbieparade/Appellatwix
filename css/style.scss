@@ -1169,7 +1169,7 @@ body
 	background: transparent;
 }
 
-@media screen and (min-width: 900px) {
+@media screen and (min-width: 1200px) {
   html.blended body
 	{
 		#blender_syns
@@ -1180,7 +1180,27 @@ body
 		#synonyms
 		{
 			min-width: 50%;
-			max-width: 450px;
+			flex-direction: row;
+
+			.input_word
+			{
+				width: calc(50% - 5px) !important;
+			}
+		}
+  }
+}
+
+@media screen and (min-width: 900px) and (max-width: 1199px)  {
+  html.blended body
+	{
+		#blender_syns
+		{
+			flex-direction: row-reverse;
+		}
+
+		#synonyms
+		{
+			min-width: 50%;
 			flex-direction: column;
 
 			.input_word

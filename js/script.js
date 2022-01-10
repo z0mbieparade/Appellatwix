@@ -3,7 +3,7 @@
 const combo = new Combine({...{
 	on_update_word_list: function(word_tab_list)
 	{
-		console.log(word_tab_list)
+	//	console.log(word_tab_list)
 
 		let blend_count = 0;
 

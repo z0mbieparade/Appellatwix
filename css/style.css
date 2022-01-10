@@ -942,13 +942,25 @@ body #synonyms .input_word .input_results .tab_body .sense .err_list .wd:hover {
   background: transparent;
 }
 
-@media screen and (min-width: 900px) {
+@media screen and (min-width: 1200px) {
   html.blended body #blender_syns {
     flex-direction: row-reverse;
   }
   html.blended body #synonyms {
     min-width: 50%;
-    max-width: 450px;
+    flex-direction: row;
+  }
+  html.blended body #synonyms .input_word {
+    width: calc(50% - 5px) !important;
+  }
+}
+
+@media screen and (min-width: 900px) and (max-width: 1199px) {
+  html.blended body #blender_syns {
+    flex-direction: row-reverse;
+  }
+  html.blended body #synonyms {
+    min-width: 50%;
     flex-direction: column;
   }
   html.blended body #synonyms .input_word {
